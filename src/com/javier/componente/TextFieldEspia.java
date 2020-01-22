@@ -7,15 +7,14 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TextField;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class TextFieldEspia extends TextField {
 
     private StringProperty ficheroLog = new SimpleStringProperty();
     private ArrayList<EnPalabraCorrecta> enPalabraCorrecta;
+    private ArrayList<String> listaPalabras = new ArrayList<String>();
 
     public TextFieldEspia() {
         enPalabraCorrecta = new ArrayList<EnPalabraCorrecta>();
@@ -37,41 +36,46 @@ public class TextFieldEspia extends TextField {
         this.enPalabraCorrecta.add(enPalabraCorrecta);
     }
 
+    public ArrayList<String> getListaPalabras() {
+        return listaPalabras;
+    }
+
+    public void setListaPalabras(ArrayList<String> listaPalabras) {
+        this.listaPalabras = listaPalabras;
+    }
 
     public void iniciar() throws IOException {
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (ficheroLog != null) {
-                    textProperty().addListener(new ChangeListener<String>() {
-                        @Override
-                        public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-                            for (EnPalabraCorrecta e : enPalabraCorrecta) {
-                                try {
-                                    e.ejecuta("piedra");
-                                } catch (IOException ex) {
-                                    ex.printStackTrace();
+        if (ficheroLog.get() != null) {
+            textProperty().addListener(new ChangeListener<String>() {
+                @Override
+                public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
+                    if (listaPalabras.size() > 0) {
+                        for (int i = 0; i < listaPalabras.size(); i++) {
+                            Date date = new Date();
+                            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+                            String fecha = sdf.format(date);
+                            try {
+                                PrintWriter printWriter = new PrintWriter(ficheroLog.get());
+                                printWriter.write(getText() + ". Fecha: " + fecha);
+                                printWriter.close();
+                                for (EnPalabraCorrecta e : enPalabraCorrecta) {
+                                    try {
+                                        e.ejecuta();
+                                    } catch (IOException ex) {
+                                        ex.printStackTrace();
+                                    }
                                 }
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
                             }
                         }
-                    });
-                    {
                     }
-                } else {
-                    timer.cancel();
-                    timer.purge();
                 }
-            }
-        }, 1000, 1000);
+            });
+        }
     }
 
     public void aniadirPalabra(String palabra) throws IOException {
-        Calendar c = Calendar.getInstance();
-        FileWriter fw = new FileWriter(this.ficheroLog.get());
-        fw.write(palabra);
-        fw.append((char) c.get(Calendar.DATE));
-        fw.append((char) c.get(Calendar.HOUR_OF_DAY));
-
+        listaPalabras.add(palabra);
     }
 }

@@ -14,11 +14,12 @@ public class Prueba extends Application {
     public void start(Stage stage) throws Exception {
         VBox vBox=new VBox();
         TextFieldEspia tfe=new TextFieldEspia();
-        tfe.setFicheroLog("C:/Users/DAM/Desktop/ficheroLog.txt");
+        tfe.setFicheroLog("C:/Users/Javi/Desktop/ficheroLog.txt");
+        tfe.aniadirPalabra("Hola");
         tfe.addEnPalabraCorrecta(new EnPalabraCorrecta() {
             @Override
-            public void ejecuta(String palabra) throws IOException {
-                tfe.aniadirPalabra(palabra);
+            public void ejecuta() throws IOException {
+                System.out.println("Prueba de ejecución de evento");
             }
         });
 
